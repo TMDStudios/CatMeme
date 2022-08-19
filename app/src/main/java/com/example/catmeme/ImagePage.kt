@@ -1,15 +1,15 @@
 package com.example.catmeme
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.material.Text
-import androidx.compose.ui.res.painterResource
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import coil.compose.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,7 +32,9 @@ import retrofit2.Response
 @Composable
 fun ImagePage(){
     val apiInterface = APIClient().getClient()?.create(APIInterface::class.java)
-    var imgLink by remember { mutableStateOf("placeholder") }
+    // Set default img link to our placeholder cat image
+    var imgLink by remember { mutableStateOf(
+        Uri.parse("android.resource://com.example.catmeme/"+R.drawable.cat1).toString()) }
 
     Card(elevation = 6.dp, modifier = Modifier
         .fillMaxSize()
@@ -46,19 +49,22 @@ fun ImagePage(){
             }
             ConstraintLayout(constraints){
 
-                Image(
-                    painter = painterResource(id = R.drawable.cat1),
+                // Display Image with Coil
+                SubcomposeAsyncImage(
+                    model=imgLink,
+                    loading = {
+                        CircularProgressIndicator()
+                    },
+                    error = {
+                        CircularProgressIndicator()
+                    },
                     contentDescription = "cat1",
                     modifier = Modifier
                         .size(200.dp)
                         .clip(CircleShape)
-                        .border(
-                            width = 2.dp,
-                            color = Color.Red,
-                            shape = CircleShape
-                        )
                         .layoutId("image"),
-                    contentScale = ContentScale.Crop)
+                    contentScale = ContentScale.Crop
+                )
 
                 Text(text=imgLink,
                     fontWeight = FontWeight.Bold, modifier = Modifier.layoutId("nameText"))
@@ -75,6 +81,7 @@ fun ImagePage(){
                 }
 
                 Button(onClick = {
+                    imgLink = "Getting Image"
                     apiInterface?.getImg()?.enqueue(object: Callback<CatImg> {
                         override fun onResponse(call: Call<CatImg>, response: Response<CatImg>) {
                             try{
