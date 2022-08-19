@@ -17,6 +17,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.layoutId
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -42,12 +44,21 @@ fun ImagePage(){
         .border(width = 2.dp, color = Color.White, shape = RoundedCornerShape(30.dp))
     ) {
         BoxWithConstraints() {
-            val constraints = if(minWidth<600.dp){
-                portraitConstraints(margin=16.dp)
-            }else{
-                landscapeConstraints(margin=16.dp)
-            }
-            ConstraintLayout(constraints){
+            ConstraintLayout(portraitConstraints(margin=16.dp)){
+
+                Text(text="", modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentSize(Alignment.Center))
+
+                Image(
+                    painter = painterResource(id = R.drawable.cat1),
+                    alpha = .25f,
+                    contentDescription = "cat1",
+                    modifier = Modifier
+                        .size(320.dp)
+                        .clip(CircleShape)
+                        .layoutId("imageBG"),
+                    contentScale = ContentScale.Crop)
 
                 // Display Image with Coil
                 SubcomposeAsyncImage(
@@ -60,25 +71,15 @@ fun ImagePage(){
                     },
                     contentDescription = "cat1",
                     modifier = Modifier
-                        .size(200.dp)
+                        .size(320.dp)
                         .clip(CircleShape)
                         .layoutId("image"),
                     contentScale = ContentScale.Crop
                 )
 
+                Text(text="Current Image Link:", Modifier.layoutId("labelText"))
                 Text(text=imgLink,
-                    fontWeight = FontWeight.Bold, modifier = Modifier.layoutId("nameText"))
-                Text(text="Forest", Modifier.layoutId("locationText"))
-
-                Row(horizontalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .layoutId("rowStats")) {
-                    ProfileStats(count = "150", title = "Followers")
-                    ProfileStats(count = "100", title = "Following")
-                    ProfileStats(count = "30", title = "Posts")
-                }
+                    fontWeight = FontWeight.Bold, modifier = Modifier.layoutId("urlText"))
 
                 Button(onClick = {
                     imgLink = "Getting Image"
@@ -109,97 +110,45 @@ fun ImagePage(){
     }
 }
 
-@Composable
-fun ProfileStats(count: String, title: String){
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text=count, fontWeight = FontWeight.Bold)
-        Text(text=title)
-    }
-}
-
 private fun portraitConstraints(margin:Dp): ConstraintSet{
     return ConstraintSet{
+        val imageBG = createRefFor("imageBG")
         val image = createRefFor("image")
-        val nameText = createRefFor("nameText")
-        val locationText = createRefFor("locationText")
-        val rowStats = createRefFor("rowStats")
+        val labelText = createRefFor("labelText")
+        val urlText = createRefFor("urlText")
         val getImgBtn = createRefFor("getImgBtn")
         val selectImgBtn = createRefFor("selectImgBtn")
-        val guideline = createGuidelineFromTop(0.3f)
+        val guideline = createGuidelineFromTop(0.15f)
 
+        constrain(imageBG){
+            top.linkTo(guideline)
+            start.linkTo(parent.start)
+            end.linkTo(parent.end)
+        }
         constrain(image){
             top.linkTo(guideline)
             start.linkTo(parent.start)
             end.linkTo(parent.end)
         }
-        constrain(nameText){
-            top.linkTo(image.bottom)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-        }
-        constrain(locationText){
-            top.linkTo(nameText.bottom)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-        }
-        constrain(rowStats){
-            top.linkTo(locationText.bottom)
-        }
-        constrain(getImgBtn){
-            top.linkTo(rowStats.bottom, margin = 16.dp)
-            start.linkTo(parent.start)
-            end.linkTo(selectImgBtn.start)
-            width = Dimension.wrapContent
-        }
-        constrain(selectImgBtn){
-            top.linkTo(rowStats.bottom, margin = 16.dp)
-            start.linkTo(getImgBtn.end)
-            end.linkTo(parent.end)
-            width = Dimension.wrapContent
-        }
-    }
-}
-
-private fun landscapeConstraints(margin:Dp): ConstraintSet{
-    return ConstraintSet{
-        val image = createRefFor("image")
-        val nameText = createRefFor("nameText")
-        val locationText = createRefFor("locationText")
-        val rowStats = createRefFor("rowStats")
-        val getImgBtn = createRefFor("getImgBtn")
-        val selectImgBtn = createRefFor("selectImgBtn")
-
-        constrain(image){
-            top.linkTo(parent.top, margin=margin)
-            start.linkTo(parent.start, margin=margin)
-        }
-        constrain(nameText){
-            top.linkTo(image.bottom)
+        constrain(labelText){
+            top.linkTo(image.bottom, margin=margin)
             start.linkTo(image.start)
         }
-        constrain(locationText){
-            top.linkTo(nameText.bottom)
-            start.linkTo(nameText.start)
-            end.linkTo(nameText.end)
-        }
-        constrain(rowStats){
-            top.linkTo(image.top)
-            start.linkTo(image.end, margin=margin)
-            end.linkTo(parent.end)
+        constrain(urlText){
+            top.linkTo(labelText.bottom)
+            start.linkTo(image.start)
         }
         constrain(getImgBtn){
-            top.linkTo(rowStats.bottom, margin = 16.dp)
-            start.linkTo(rowStats.start)
+            top.linkTo(urlText.bottom, margin=margin)
+            start.linkTo(parent.start)
             end.linkTo(selectImgBtn.start)
-            bottom.linkTo(locationText.bottom)
-            width = Dimension.wrapContent
+            width = Dimension.value(140.dp)
         }
         constrain(selectImgBtn){
-            top.linkTo(rowStats.bottom, margin = 16.dp)
+            top.linkTo(urlText.bottom, margin=margin)
             start.linkTo(getImgBtn.end)
             end.linkTo(parent.end)
-            bottom.linkTo(locationText.bottom)
-            width = Dimension.wrapContent
+            width = Dimension.value(140.dp)
         }
     }
 }
