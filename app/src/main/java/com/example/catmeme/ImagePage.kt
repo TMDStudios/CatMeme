@@ -1,17 +1,16 @@
 package com.example.catmeme
 
+import android.util.Log
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Card
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -25,9 +24,15 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 @Composable
 fun ImagePage(){
+    val apiInterface = APIClient().getClient()?.create(APIInterface::class.java)
+    var imgLink by remember { mutableStateOf("placeholder") }
+
     Card(elevation = 6.dp, modifier = Modifier
         .fillMaxSize()
         .padding(16.dp)
@@ -55,7 +60,7 @@ fun ImagePage(){
                         .layoutId("image"),
                     contentScale = ContentScale.Crop)
 
-                Text(text="Thoughtful cat",
+                Text(text=imgLink,
                     fontWeight = FontWeight.Bold, modifier = Modifier.layoutId("nameText"))
                 Text(text="Forest", Modifier.layoutId("locationText"))
 
@@ -69,13 +74,27 @@ fun ImagePage(){
                     ProfileStats(count = "30", title = "Posts")
                 }
 
-                Button(onClick = { /*TODO*/ },
-                    modifier = Modifier.layoutId("buttonFollow")) {
-                    Text(text = "Follow User")
+                Button(onClick = {
+                    apiInterface?.getImg()?.enqueue(object: Callback<CatImg> {
+                        override fun onResponse(call: Call<CatImg>, response: Response<CatImg>) {
+                            try{
+                                imgLink = response.body()!![0].url
+                            }catch(e: Exception){
+                                Log.d("MAIN", "ISSUE: $e")
+                            }
+                        }
+
+                        override fun onFailure(call: Call<CatImg>, t: Throwable) {
+                            Log.d("MAIN", "Unable to get data")
+                        }
+
+                    })},
+                    modifier = Modifier.layoutId("getImgBtn")) {
+                    Text(text = "Get Image")
                 }
                 Button(onClick = { /*TODO*/ },
-                    modifier = Modifier.layoutId("buttonMessage")) {
-                    Text(text = "Direct Message")
+                    modifier = Modifier.layoutId("selectImgBtn")) {
+                    Text(text = "Select Image")
                 }
 
             }
@@ -97,8 +116,8 @@ private fun portraitConstraints(margin:Dp): ConstraintSet{
         val nameText = createRefFor("nameText")
         val locationText = createRefFor("locationText")
         val rowStats = createRefFor("rowStats")
-        val buttonFollow = createRefFor("buttonFollow")
-        val buttonMessage = createRefFor("buttonMessage")
+        val getImgBtn = createRefFor("getImgBtn")
+        val selectImgBtn = createRefFor("selectImgBtn")
         val guideline = createGuidelineFromTop(0.3f)
 
         constrain(image){
@@ -119,15 +138,15 @@ private fun portraitConstraints(margin:Dp): ConstraintSet{
         constrain(rowStats){
             top.linkTo(locationText.bottom)
         }
-        constrain(buttonFollow){
+        constrain(getImgBtn){
             top.linkTo(rowStats.bottom, margin = 16.dp)
             start.linkTo(parent.start)
-            end.linkTo(buttonMessage.start)
+            end.linkTo(selectImgBtn.start)
             width = Dimension.wrapContent
         }
-        constrain(buttonMessage){
+        constrain(selectImgBtn){
             top.linkTo(rowStats.bottom, margin = 16.dp)
-            start.linkTo(buttonFollow.end)
+            start.linkTo(getImgBtn.end)
             end.linkTo(parent.end)
             width = Dimension.wrapContent
         }
@@ -140,8 +159,8 @@ private fun landscapeConstraints(margin:Dp): ConstraintSet{
         val nameText = createRefFor("nameText")
         val locationText = createRefFor("locationText")
         val rowStats = createRefFor("rowStats")
-        val buttonFollow = createRefFor("buttonFollow")
-        val buttonMessage = createRefFor("buttonMessage")
+        val getImgBtn = createRefFor("getImgBtn")
+        val selectImgBtn = createRefFor("selectImgBtn")
 
         constrain(image){
             top.linkTo(parent.top, margin=margin)
@@ -161,16 +180,16 @@ private fun landscapeConstraints(margin:Dp): ConstraintSet{
             start.linkTo(image.end, margin=margin)
             end.linkTo(parent.end)
         }
-        constrain(buttonFollow){
+        constrain(getImgBtn){
             top.linkTo(rowStats.bottom, margin = 16.dp)
             start.linkTo(rowStats.start)
-            end.linkTo(buttonMessage.start)
+            end.linkTo(selectImgBtn.start)
             bottom.linkTo(locationText.bottom)
             width = Dimension.wrapContent
         }
-        constrain(buttonMessage){
+        constrain(selectImgBtn){
             top.linkTo(rowStats.bottom, margin = 16.dp)
-            start.linkTo(buttonFollow.end)
+            start.linkTo(getImgBtn.end)
             end.linkTo(parent.end)
             bottom.linkTo(locationText.bottom)
             width = Dimension.wrapContent
