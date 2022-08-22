@@ -54,7 +54,7 @@ fun ImagePage(navController: NavController){
                 Image(
                     painter = painterResource(id = R.drawable.cat1),
                     alpha = .25f,
-                    contentDescription = "cat1",
+                    contentDescription = "background cat image",
                     modifier = Modifier
                         .size(320.dp)
                         .clip(CircleShape)
@@ -70,7 +70,7 @@ fun ImagePage(navController: NavController){
                     error = {
                         CircularProgressIndicator()
                     },
-                    contentDescription = "cat1",
+                    contentDescription = "cat image",
                     modifier = Modifier
                         .size(320.dp)
                         .clip(CircleShape)
@@ -89,12 +89,12 @@ fun ImagePage(navController: NavController){
                             try{
                                 imgLink = response.body()!![0].url
                             }catch(e: Exception){
-                                Log.d("MAIN", "ISSUE: $e")
+                                Log.d("ImagePage", "ISSUE: $e")
                             }
                         }
 
                         override fun onFailure(call: Call<CatImg>, t: Throwable) {
-                            Log.d("MAIN", "Unable to get data")
+                            Log.d("ImagePage", "Unable to get data")
                         }
 
                     })},
@@ -102,7 +102,6 @@ fun ImagePage(navController: NavController){
                     Text(text = "Get Image")
                 }
                 Button(onClick = {
-                    Log.d("ImagePage", "LINK: $imgLink")
                     val imageId = imgLink.split("/")
                     navController.navigate(Screen.MemeScreen.withArgs(imageId[imageId.size-1]))
                 },
