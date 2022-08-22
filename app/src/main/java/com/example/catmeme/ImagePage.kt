@@ -26,13 +26,14 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.ConstraintSet
 import androidx.constraintlayout.compose.Dimension
+import androidx.navigation.NavController
 import coil.compose.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 @Composable
-fun ImagePage(){
+fun ImagePage(navController: NavController){
     val apiInterface = APIClient().getClient()?.create(APIInterface::class.java)
     // Set default img link to our placeholder cat image
     var imgLink by remember { mutableStateOf(
@@ -100,7 +101,11 @@ fun ImagePage(){
                     modifier = Modifier.layoutId("getImgBtn")) {
                     Text(text = "Get Image")
                 }
-                Button(onClick = { /*TODO*/ },
+                Button(onClick = {
+                    Log.d("ImagePage", "LINK: $imgLink")
+                    val imageId = imgLink.split("/")
+                    navController.navigate(Screen.MemeScreen.withArgs(imageId[imageId.size-1]))
+                },
                     modifier = Modifier.layoutId("selectImgBtn")) {
                     Text(text = "Select Image")
                 }
@@ -156,5 +161,5 @@ private fun portraitConstraints(margin:Dp): ConstraintSet{
 @Preview(showBackground = true)
 @Composable
 fun ImagePagePreview(){
-    ImagePage()
+
 }
