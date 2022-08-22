@@ -34,6 +34,9 @@ fun MemePage(imgUrl: String?){
     val keyboardController = LocalSoftwareKeyboardController.current
     var showTextField by remember{ mutableStateOf(true) }
 
+    // The number equals R.drawable.cat1
+    if(imgUrl!! == "2130968578"){imgLink="android.resource://com.example.catmeme/2130968578"}
+
     ConstraintLayout(portraitConstraints(showTextField)){
 
         SubcomposeAsyncImage(
